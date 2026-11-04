@@ -1,0 +1,431 @@
+{
+    "excel_version":  "16.0",
+    "template_file":  "D:\\Apna Clinic\\APNA_CLINIC_MASTER_SHEET_TEMPLATE_FINAL.xlsx",
+    "sheets_detected":  20,
+    "sheet_names":  [
+                        "01_SETTINGS",
+                        "02_USERS",
+                        "03_ROLES",
+                        "04_DOCTORS",
+                        "05_PATIENTS",
+                        "06_APPOINTMENTS",
+                        "07_DOCTOR_SCHEDULES",
+                        "08_QUEUE",
+                        "09_CONSULTATIONS",
+                        "10_BILLING",
+                        "11_PAYMENTS",
+                        "12_SERVICES",
+                        "13_MEDICAL_RECORDS",
+                        "14_PRESCRIPTIONS",
+                        "15_FOLLOW_UPS",
+                        "16_ROOMS",
+                        "17_AUDIT_LOG",
+                        "18_NOTIFICATIONS",
+                        "19_REPORTING",
+                        "20_LOOKUPS"
+                    ],
+    "named_ranges_detected":  25,
+    "named_ranges":  [
+                         {
+                             "refers_to":  "=#NAME?",
+                             "name":  "_xlfn.COUNTIFS"
+                         },
+                         {
+                             "refers_to":  "=#NAME?",
+                             "name":  "_xlfn.SUMIFS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$5:$C$10",
+                             "name":  "LK_APPOINTMENT_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$11:$C$14",
+                             "name":  "LK_APPOINTMENT_TYPE"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$67:$C$75",
+                             "name":  "LK_BLOOD_GROUP"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$15:$C$18",
+                             "name":  "LK_BOOKING_SOURCE"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$103:$C$104",
+                             "name":  "LK_BOOLEAN"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$100:$C$102",
+                             "name":  "LK_CONSENT_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$29:$C$32",
+                             "name":  "LK_CONSULTATION_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$93:$C$99",
+                             "name":  "LK_DAYS_OF_WEEK"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$50:$C$52",
+                             "name":  "LK_DOCTOR_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$86:$C$89",
+                             "name":  "LK_FOLLOWUP_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$2:$C$4",
+                             "name":  "LK_GENDER"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$90:$C$92",
+                             "name":  "LK_NOTIFICATION_CHANNEL"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$47:$C$49",
+                             "name":  "LK_PATIENT_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$37:$C$41",
+                             "name":  "LK_PAYMENT_METHOD"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$33:$C$36",
+                             "name":  "LK_PAYMENT_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$25:$C$28",
+                             "name":  "LK_QUEUE_PRIORITY"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$19:$C$24",
+                             "name":  "LK_QUEUE_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$63:$C$66",
+                             "name":  "LK_ROOM_STATUS"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$58:$C$62",
+                             "name":  "LK_ROOM_TYPE"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$76:$C$80",
+                             "name":  "LK_RX_FREQUENCY"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$81:$C$85",
+                             "name":  "LK_RX_ROUTE"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$53:$C$57",
+                             "name":  "LK_SERVICE_CATEGORY"
+                         },
+                         {
+                             "refers_to":  "=\u002720_LOOKUPS\u0027!$C$42:$C$46",
+                             "name":  "LK_USER_ROLE"
+                         }
+                     ],
+    "broken_named_ranges":  0,
+    "formula_cells_checked":  22,
+    "formula_errors_detected":  0,
+    "formula_error_details":  [
+
+                              ],
+    "circular_references":  0,
+    "unexpected_merged_cells":  0,
+    "calculated_values":  {
+                              "19_REPORTING":  [
+                                                   {
+                                                       "evaluated_numeric":  "2026-09-29",
+                                                       "metric_name":  "Active Clinic Business Date",
+                                                       "kpi_id":  "KPI-000",
+                                                       "row":  2,
+                                                       "evaluated_value":  "2026-09-29",
+                                                       "formula":  "=\u002701_SETTINGS\u0027!$D$23"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  8,
+                                                       "metric_name":  "Total Registered Patients",
+                                                       "kpi_id":  "KPI-001",
+                                                       "row":  3,
+                                                       "evaluated_value":  "8",
+                                                       "formula":  "=COUNTA(\u002705_PATIENTS\u0027!A:A)-1"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  3,
+                                                       "metric_name":  "Total Active Doctors",
+                                                       "kpi_id":  "KPI-002",
+                                                       "row":  4,
+                                                       "evaluated_value":  "3",
+                                                       "formula":  "=COUNTIF(\u002704_DOCTORS\u0027!L:L, \"ACTIVE\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  9,
+                                                       "metric_name":  "Total Appointments Today",
+                                                       "kpi_id":  "KPI-003",
+                                                       "row":  5,
+                                                       "evaluated_value":  "9",
+                                                       "formula":  "=COUNTIF(\u002706_APPOINTMENTS\u0027!E:E, $C$2)"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  3,
+                                                       "metric_name":  "Scheduled Appointments Today",
+                                                       "kpi_id":  "KPI-004",
+                                                       "row":  6,
+                                                       "evaluated_value":  "3",
+                                                       "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"SCHEDULED\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  3,
+                                                       "metric_name":  "Checked-In Patients Today (Waiting Queue)",
+                                                       "kpi_id":  "KPI-005",
+                                                       "row":  7,
+                                                       "evaluated_value":  "3",
+                                                       "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"WAITING\")+COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"CALLED\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  1,
+                                                       "metric_name":  "In Consultation Now",
+                                                       "kpi_id":  "KPI-006",
+                                                       "row":  8,
+                                                       "evaluated_value":  "1",
+                                                       "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"IN_CONSULTATION\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  2,
+                                                       "metric_name":  "Completed Consultations Today",
+                                                       "kpi_id":  "KPI-007",
+                                                       "row":  9,
+                                                       "evaluated_value":  "2",
+                                                       "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"COMPLETED\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  1,
+                                                       "metric_name":  "Cancelled Appointments Today",
+                                                       "kpi_id":  "KPI-008",
+                                                       "row":  10,
+                                                       "evaluated_value":  "1",
+                                                       "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"CANCELLED\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  0,
+                                                       "metric_name":  "No-Show Appointments Today",
+                                                       "kpi_id":  "KPI-009",
+                                                       "row":  11,
+                                                       "evaluated_value":  "0",
+                                                       "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"NO_SHOW\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  2500,
+                                                       "metric_name":  "Today Invoiced Revenue (Gross)",
+                                                       "kpi_id":  "KPI-010",
+                                                       "row":  12,
+                                                       "evaluated_value":  "2500",
+                                                       "formula":  "=SUMIF(\u002710_BILLING\u0027!E:E, $C$2, \u002710_BILLING\u0027!I:I)"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  1450,
+                                                       "metric_name":  "Today Collected Revenue (Net)",
+                                                       "kpi_id":  "KPI-011",
+                                                       "row":  13,
+                                                       "evaluated_value":  "1450",
+                                                       "formula":  "=SUMIFS(\u002711_PAYMENTS\u0027!E:E, \u002711_PAYMENTS\u0027!D:D, $C$2, \u002711_PAYMENTS\u0027!H:H, \"COMPLETED\")"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  1050,
+                                                       "metric_name":  "Total Outstanding Receivables",
+                                                       "kpi_id":  "KPI-012",
+                                                       "row":  14,
+                                                       "evaluated_value":  "1050",
+                                                       "formula":  "=SUM(\u002710_BILLING\u0027!K:K)"
+                                                   },
+                                                   {
+                                                       "evaluated_numeric":  2,
+                                                       "metric_name":  "Active Chambers in Use",
+                                                       "kpi_id":  "KPI-013",
+                                                       "row":  15,
+                                                       "evaluated_value":  "2",
+                                                       "formula":  "=COUNTIF(\u002716_ROOMS\u0027!F:F, \"OCCUPIED\")"
+                                                   }
+                                               ],
+                              "10_BILLING":  [
+                                                 {
+                                                     "paid_amount":  500,
+                                                     "total_formula":  "=F2-G2+H2",
+                                                     "subtotal":  500,
+                                                     "row":  2,
+                                                     "invoice_id":  "INV-000001",
+                                                     "tax":  0,
+                                                     "due_formula":  "=I2-J2",
+                                                     "discount":  0,
+                                                     "total_amount_calc":  500,
+                                                     "status":  "PAID",
+                                                     "due_amount_calc":  0
+                                                 },
+                                                 {
+                                                     "paid_amount":  450,
+                                                     "total_formula":  "=F3-G3+H3",
+                                                     "subtotal":  500,
+                                                     "row":  3,
+                                                     "invoice_id":  "INV-000002",
+                                                     "tax":  0,
+                                                     "due_formula":  "=I3-J3",
+                                                     "discount":  50,
+                                                     "total_amount_calc":  450,
+                                                     "status":  "PAID",
+                                                     "due_amount_calc":  0
+                                                 },
+                                                 {
+                                                     "paid_amount":  500,
+                                                     "total_formula":  "=F4-G4+H4",
+                                                     "subtotal":  850,
+                                                     "row":  4,
+                                                     "invoice_id":  "INV-000003",
+                                                     "tax":  0,
+                                                     "due_formula":  "=I4-J4",
+                                                     "discount":  0,
+                                                     "total_amount_calc":  850,
+                                                     "status":  "PARTIAL",
+                                                     "due_amount_calc":  350
+                                                 },
+                                                 {
+                                                     "paid_amount":  0,
+                                                     "total_formula":  "=F5-G5+H5",
+                                                     "subtotal":  700,
+                                                     "row":  5,
+                                                     "invoice_id":  "INV-000004",
+                                                     "tax":  0,
+                                                     "due_formula":  "=I5-J5",
+                                                     "discount":  0,
+                                                     "total_amount_calc":  700,
+                                                     "status":  "UNPAID",
+                                                     "due_amount_calc":  700
+                                                 }
+                                             ]
+                          },
+    "test_flow_executed":  true,
+    "test_flow_records_inserted":  12,
+    "test_flow_recalculated_values":  {
+                                          "19_REPORTING":  [
+                                                               {
+                                                                   "recalculated_value":  "2026-09-29",
+                                                                   "metric_name":  "Active Clinic Business Date",
+                                                                   "kpi_id":  "KPI-000",
+                                                                   "row":  2,
+                                                                   "recalculated_numeric":  "2026-09-29",
+                                                                   "formula":  "=\u002701_SETTINGS\u0027!$D$23"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "11",
+                                                                   "metric_name":  "Total Registered Patients",
+                                                                   "kpi_id":  "KPI-001",
+                                                                   "row":  3,
+                                                                   "recalculated_numeric":  11,
+                                                                   "formula":  "=COUNTA(\u002705_PATIENTS\u0027!A:A)-1"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "5",
+                                                                   "metric_name":  "Total Active Doctors",
+                                                                   "kpi_id":  "KPI-002",
+                                                                   "row":  4,
+                                                                   "recalculated_numeric":  5,
+                                                                   "formula":  "=COUNTIF(\u002704_DOCTORS\u0027!L:L, \"ACTIVE\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "11",
+                                                                   "metric_name":  "Total Appointments Today",
+                                                                   "kpi_id":  "KPI-003",
+                                                                   "row":  5,
+                                                                   "recalculated_numeric":  11,
+                                                                   "formula":  "=COUNTIF(\u002706_APPOINTMENTS\u0027!E:E, $C$2)"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "4",
+                                                                   "metric_name":  "Scheduled Appointments Today",
+                                                                   "kpi_id":  "KPI-004",
+                                                                   "row":  6,
+                                                                   "recalculated_numeric":  4,
+                                                                   "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"SCHEDULED\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "4",
+                                                                   "metric_name":  "Checked-In Patients Today (Waiting Queue)",
+                                                                   "kpi_id":  "KPI-005",
+                                                                   "row":  7,
+                                                                   "recalculated_numeric":  4,
+                                                                   "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"WAITING\")+COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"CALLED\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "2",
+                                                                   "metric_name":  "In Consultation Now",
+                                                                   "kpi_id":  "KPI-006",
+                                                                   "row":  8,
+                                                                   "recalculated_numeric":  2,
+                                                                   "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"IN_CONSULTATION\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "2",
+                                                                   "metric_name":  "Completed Consultations Today",
+                                                                   "kpi_id":  "KPI-007",
+                                                                   "row":  9,
+                                                                   "recalculated_numeric":  2,
+                                                                   "formula":  "=COUNTIFS(\u002708_QUEUE\u0027!F:F, $C$2, \u002708_QUEUE\u0027!K:K, \"COMPLETED\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "1",
+                                                                   "metric_name":  "Cancelled Appointments Today",
+                                                                   "kpi_id":  "KPI-008",
+                                                                   "row":  10,
+                                                                   "recalculated_numeric":  1,
+                                                                   "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"CANCELLED\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "0",
+                                                                   "metric_name":  "No-Show Appointments Today",
+                                                                   "kpi_id":  "KPI-009",
+                                                                   "row":  11,
+                                                                   "recalculated_numeric":  0,
+                                                                   "formula":  "=COUNTIFS(\u002706_APPOINTMENTS\u0027!E:E, $C$2, \u002706_APPOINTMENTS\u0027!J:J, \"NO_SHOW\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "3185",
+                                                                   "metric_name":  "Today Invoiced Revenue (Gross)",
+                                                                   "kpi_id":  "KPI-010",
+                                                                   "row":  12,
+                                                                   "recalculated_numeric":  3185,
+                                                                   "formula":  "=SUMIF(\u002710_BILLING\u0027!E:E, $C$2, \u002710_BILLING\u0027!I:I)"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "2135",
+                                                                   "metric_name":  "Today Collected Revenue (Net)",
+                                                                   "kpi_id":  "KPI-011",
+                                                                   "row":  13,
+                                                                   "recalculated_numeric":  2135,
+                                                                   "formula":  "=SUMIFS(\u002711_PAYMENTS\u0027!E:E, \u002711_PAYMENTS\u0027!D:D, $C$2, \u002711_PAYMENTS\u0027!H:H, \"COMPLETED\")"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "1050",
+                                                                   "metric_name":  "Total Outstanding Receivables",
+                                                                   "kpi_id":  "KPI-012",
+                                                                   "row":  14,
+                                                                   "recalculated_numeric":  1050,
+                                                                   "formula":  "=SUM(\u002710_BILLING\u0027!K:K)"
+                                                               },
+                                                               {
+                                                                   "recalculated_value":  "2",
+                                                                   "metric_name":  "Active Chambers in Use",
+                                                                   "kpi_id":  "KPI-013",
+                                                                   "row":  15,
+                                                                   "recalculated_numeric":  2,
+                                                                   "formula":  "=COUNTIF(\u002716_ROOMS\u0027!F:F, \"OCCUPIED\")"
+                                                               }
+                                                           ],
+                                          "new_invoice":  {
+                                                              "total":  685,
+                                                              "due":  0
+                                                          }
+                                      },
+    "status":  "COMPLETED"
+}

@@ -1,0 +1,22 @@
+setting_id,setting_category,setting_key,setting_value,data_type,description,is_system,updated_at
+SET-000001,Identity,clinic_name,Apna Clinic,STRING,Display name of the medical clinic,TRUE,2026-09-29 08:00:00
+SET-000002,Identity,legal_name,Apna Clinic Healthcare LLP,STRING,Registered legal entity name,TRUE,2026-09-29 08:00:00
+SET-000003,Identity,clinic_address,"Shop 12-14, Ground Floor, Vardhman Market, Sector 6, Dwarka, New Delhi 110075",STRING,Full physical address of the clinic,TRUE,2026-09-29 08:00:00
+SET-000004,Identity,clinic_phone,+91 98765 43210,STRING,Primary reception and emergency contact,TRUE,2026-09-29 08:00:00
+SET-000005,Identity,clinic_email,contact@apnaclinic.com,STRING,Official clinic contact email,TRUE,2026-09-29 08:00:00
+SET-000006,Operations,timezone,Asia/Kolkata,STRING,IANA timezone for Indian Standard Time,TRUE,2026-09-29 08:00:00
+SET-000007,Operations,currency,INR,STRING,Operating currency code,TRUE,2026-09-29 08:00:00
+SET-000008,Operations,opening_time,08:30,TIME,Standard clinic opening time (HH:MM),FALSE,2026-09-29 08:00:00
+SET-000009,Operations,closing_time,20:30,TIME,Standard clinic closing time (HH:MM),FALSE,2026-09-29 08:00:00
+SET-000010,Operations,default_appointment_duration,15,INTEGER,Default appointment duration in minutes,FALSE,2026-09-29 08:00:00
+SET-000011,Operations,default_follow_up_days,7,INTEGER,Default follow-up window in days,FALSE,2026-09-29 08:00:00
+SET-000012,Operations,default_consultation_fee,500.00,DECIMAL,Standard general consultation fee in INR,FALSE,2026-09-29 08:00:00
+SET-000013,Prefixes,patient_code_prefix,PAT-,STRING,Prefix for patient unique IDs,TRUE,2026-09-29 08:00:00
+SET-000014,Prefixes,appointment_code_prefix,APT-,STRING,Prefix for appointment unique IDs,TRUE,2026-09-29 08:00:00
+SET-000015,Prefixes,invoice_prefix,INV-,STRING,Prefix for billing invoice numbers,TRUE,2026-09-29 08:00:00
+SET-000016,Prefixes,payment_prefix,PAY-,STRING,Prefix for payment transaction IDs,TRUE,2026-09-29 08:00:00
+SET-000017,Prefixes,token_prefix,TOK-,STRING,Prefix for queue token IDs,TRUE,2026-09-29 08:00:00
+SET-000018,Formatting,date_format,YYYY-MM-DD,STRING,Standard ISO-8601 date display format,TRUE,2026-09-29 08:00:00
+SET-000019,Formatting,time_format,HH:mm,STRING,Standard 24-hour time format,TRUE,2026-09-29 08:00:00
+SET-000020,Compliance,tax_registration_number,07AAAAA0000A1Z5,STRING,GST / Tax registration identifier (if applicable),FALSE,2026-09-29 08:00:00
+SET-000021,System,schema_version,2.0.0,STRING,Master Sheet Relational Schema Version,TRUE,2026-09-29 08:00:00

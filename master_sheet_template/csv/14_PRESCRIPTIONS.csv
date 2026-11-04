@@ -1,0 +1,7 @@
+prescription_id,consultation_id,patient_id,medicine_name,dosage,frequency,duration,route,instructions,quantity,created_at
+RX-000001,CON-000001,PAT-000001,Tab Paracetamol 650mg,650mg (1 Tab),THRICE_DAILY,3 days,ORAL,Take after food when fever > 100 F,10,2026-09-29 09:15:00
+RX-000002,CON-000001,PAT-000001,Tab Cetirizine 10mg,10mg (1 Tab),ONCE_DAILY,5 days,ORAL,Take at bedtime,5,2026-09-29 09:15:00
+RX-000003,CON-000001,PAT-000001,Syp Ascoril-D,10ml,THRICE_DAILY,5 days,ORAL,Shake well before use,1,2026-09-29 09:15:00
+RX-000004,CON-000002,PAT-000002,Tab Telmisartan 40mg,40mg (1 Tab),ONCE_DAILY,30 days,ORAL,Take in the morning with water,30,2026-09-29 09:30:00
+RX-000005,CON-000003,PAT-000003,Tab Aceclofenac 100mg + Paracetamol 325mg,1 Tab,TWICE_DAILY,5 days,ORAL,Take strictly after meals,10,2026-09-29 09:35:00
+RX-000006,CON-000003,PAT-000003,Cap Pantoprazole 40mg,40mg (1 Cap),ONCE_DAILY,5 days,ORAL,Take 30 mins before breakfast,5,2026-09-29 09:35:00

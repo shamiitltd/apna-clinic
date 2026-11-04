@@ -1,0 +1,13 @@
+kpi_metric_id,metric_name,metric_value_formula,category,notes
+KPI-001,Report Generation Date,"=TEXT(TODAY(), ""YYYY-MM-DD"")",EXECUTIVE_SUMMARY,Current system date
+KPI-002,Total Registered Patients,=COUNTA('05_PATIENTS'!A2:A),PATIENT_METRICS,Cumulative patient registrations
+KPI-003,Total Active Doctors,"=COUNTIF('04_DOCTORS'!L2:L, ""ACTIVE"")",DOCTOR_METRICS,Doctors on active roster
+KPI-004,Today Scheduled Appointments,"=COUNTIF('06_APPOINTMENTS'!E2:E, ""2026-09-29"")",APPOINTMENT_METRICS,All appointments scheduled for today
+KPI-005,Today Checked-In Patients,"=COUNTIF('08_QUEUE'!F2:F, ""2026-09-29"")",QUEUE_METRICS,Tokens generated in queue today
+KPI-006,Today Completed Consultations,"=COUNTIFS('08_QUEUE'!F2:F, ""2026-09-29"", '08_QUEUE'!K2:K, ""COMPLETED"")",CLINICAL_METRICS,Patient visits fully consulted today
+KPI-007,Today In-Consultation / Waiting,"=COUNTIFS('08_QUEUE'!F2:F, ""2026-09-29"", '08_QUEUE'!K2:K, ""<>COMPLETED"")",QUEUE_METRICS,Patients currently in clinic queue
+KPI-008,Today Cancelled Appointments,"=COUNTIFS('06_APPOINTMENTS'!E2:E, ""2026-09-29"", '06_APPOINTMENTS'!J2:J, ""CANCELLED"")",APPOINTMENT_METRICS,Appointments cancelled today
+KPI-009,Today Invoiced Amount (INR),"=SUMIF('10_BILLING'!E2:E, ""2026-09-29"", '10_BILLING'!I2:I)",FINANCIAL_METRICS,Total invoice charges raised today
+KPI-010,Today Collected Revenue (INR),"=SUMIFS('11_PAYMENTS'!E2:E, '11_PAYMENTS'!D2:D, ""2026-09-29"", '11_PAYMENTS'!H2:H, ""COMPLETED"")",FINANCIAL_METRICS,Actual cash/UPI/card settled revenue today
+KPI-011,Total Outstanding Receivables (INR),=SUM('10_BILLING'!K2:K),FINANCIAL_METRICS,Total unpaid balance across all invoices
+KPI-012,Active Chambers in Use,"=COUNTIF('16_ROOMS'!F2:F, ""OCCUPIED"")",FACILITIES_METRICS,Chambers currently occupied

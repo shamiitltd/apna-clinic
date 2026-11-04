@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // LAYER 2: APNA CLINIC PLATFORM ACCOUNTS (users/{userId})
+    // =========================================================================
+    // Stores only account/platform-level subscription, profile, and Drive metadata.
+    // DOES NOT store patient, visit, queue, or medical records.
+    match /users/{userId} {
+      // 1. Authenticated user can read only their own account document
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // 2. New users can initialize their own account document during registration
+      allow create: if request.auth != null 
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == userId
+                    && request.resource.data.product == 'apna_clinic'
+                    && request.resource.data.accountStatus == 'active'
+                    && request.resource.data.subscriptionStatus == 'trial';
+
+      // 3. User can update non-privileged fields (e.g. fullName, phone, organizationName, Drive metadata, lastLoginAt)
+      // Privileged entitlement fields CANNOT be modified by client:
+      // accountStatus, product, plan, subscriptionStatus, subscriptionStart, subscriptionEnd,
+      // trialStart, trialEnd, licenseStatus
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                      'accountStatus',
+                      'product',
+                      'plan',
+                      'subscriptionStatus',
+                      'subscriptionStart',
+                      'subscriptionEnd',
+                      'trialStart',
+                      'trialEnd',
+                      'licenseStatus'
+                    ]);
+
+      // 4. Client deletion of accounts is forbidden
+      allow delete: if false;
+    }
+
+    // =========================================================================
+    // WEBSITE CONTACT & SUPPORT INQUIRIES (contact_inquiries/{inquiryId})
+    // =========================================================================
+    match /contact_inquiries/{inquiryId} {
+      // Prospective customers can submit contact messages with mandatory fields
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt', 'status'])
+                    && request.resource.data.name is string
+                    && request.resource.data.email is string
+                    && request.resource.data.message is string
+                    && request.resource.data.status == 'new';
+      
+      // Public cannot read, update, or delete customer inquiries
+      allow read, update, delete: if false;
+    }
+
+    // =========================================================================
+    // CLINIC OPERATIONAL DATA IS HELD IN GOOGLE DRIVE / SHEETS (NOT FIRESTORE)
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

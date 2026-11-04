@@ -1,0 +1,4 @@
+payment_id,invoice_id,patient_id,payment_date,amount,payment_method,transaction_reference,payment_status,received_by,notes,created_at
+PAY-000001,INV-000001,PAT-000001,2026-09-29,500.0,UPI,UPI/428192019283,COMPLETED,USR-000004,GPay payment verified,2026-09-29 09:22:00
+PAY-000002,INV-000002,PAT-000002,2026-09-29,450.0,CASH,CASH-REC-101,COMPLETED,USR-000004,Cash received at counter,2026-09-29 09:36:00
+PAY-000003,INV-000003,PAT-000003,2026-09-29,500.0,CARD,TXN-CARD-99201,COMPLETED,USR-000004,Visa Debit POS transaction,2026-09-29 09:38:00

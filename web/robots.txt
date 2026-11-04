@@ -1,0 +1,37 @@
+# Apna Clinic (by SHAMIIT LLP) - Robots Configuration
+# https://apnaclinic.in/robots.txt
+
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /how-it-works
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /support
+Allow: /privacy
+Allow: /terms
+Allow: /refund-policy
+Allow: /data-privacy
+Allow: /login
+Allow: /register
+
+# Disallow indexing of private customer account portals and internal clinic management routes
+Disallow: /account
+Disallow: /account/
+Disallow: /dashboard
+Disallow: /app
+Disallow: /doctor
+Disallow: /appointments
+Disallow: /patients
+Disallow: /queue
+Disallow: /billing
+Disallow: /reports
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /drive-setup
+Disallow: /account-required
+Disallow: /account-inactive
+Disallow: /unauthorized
+
+Sitemap: https://apnaclinic.in/sitemap.xml

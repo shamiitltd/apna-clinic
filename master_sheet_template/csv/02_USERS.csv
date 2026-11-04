@@ -1,0 +1,7 @@
+user_id,username,display_name,role_id,phone,email,status,assigned_doctor_ids,created_at,updated_at
+USR-000001,dr.rajesh,Dr. Rajesh Sharma,ROLE-000003,+91 9811122233,dr.rajesh@apnaclinic.com,ACTIVE,DOC-000001,2026-01-10 09:00:00,2026-09-29 08:00:00
+USR-000002,dr.priya,Dr. Priya Verma,ROLE-000003,+91 9822233344,dr.priya@apnaclinic.com,ACTIVE,DOC-000002,2026-01-10 09:00:00,2026-09-29 08:00:00
+USR-000003,reception.sunita,Sunita Sharma,ROLE-000002,+91 9876543211,sunita@apnaclinic.com,ACTIVE,"DOC-000001,DOC-000002,DOC-000003",2026-01-15 09:00:00,2026-09-29 08:00:00
+USR-000004,billing.ramesh,Ramesh Gupta,ROLE-000004,+91 9876543212,ramesh@apnaclinic.com,ACTIVE,,2026-01-15 09:00:00,2026-09-29 08:00:00
+USR-000005,admin.vikram,Vikram Singh,ROLE-000001,+91 9876543213,admin@apnaclinic.com,ACTIVE,,2026-01-01 09:00:00,2026-09-29 08:00:00
+USR-000006,manager.anita,Anita Desai,ROLE-000005,+91 9876543214,manager@apnaclinic.com,ACTIVE,,2026-02-01 09:00:00,2026-09-29 08:00:00

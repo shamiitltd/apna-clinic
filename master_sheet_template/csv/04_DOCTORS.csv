@@ -1,0 +1,4 @@
+doctor_id,doctor_code,doctor_name,specialization,qualification,registration_number,phone,email,room_id,consultation_fee,consultation_duration_minutes,status,joining_date,created_at,updated_at
+DOC-000001,DR-SHARMA,Dr. Rajesh Sharma,General Physician,"MBBS, MD (Internal Medicine)",MCI-48291,+91 9811122233,dr.rajesh@apnaclinic.com,ROOM-000001,500.0,15,ACTIVE,2024-01-15,2026-01-10 09:00:00,2026-09-29 08:00:00
+DOC-000002,DR-VERMA,Dr. Priya Verma,Gynecology & Obstetrics,"MBBS, MS (OB-GYN), DGO",DMC-39182,+91 9822233344,dr.priya@apnaclinic.com,ROOM-000002,700.0,20,ACTIVE,2024-03-01,2026-01-10 09:00:00,2026-09-29 08:00:00
+DOC-000003,DR-PATEL,Dr. Amit Patel,Orthopedics,"MBBS, MS (Orthopedics)",DMC-51029,+91 9833344455,dr.amit@apnaclinic.com,ROOM-000003,600.0,15,ACTIVE,2024-06-15,2026-01-10 09:00:00,2026-09-29 08:00:00

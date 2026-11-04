@@ -1,0 +1,11 @@
+service_id,service_code,service_name,category,description,default_fee,tax_rate,status,created_at,updated_at
+SRV-000001,CONS-GEN,General Physician Consultation,CONSULTATION,Standard Outpatient General Physician consultation,500.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000002,CONS-SPEC-GYN,Gynecology Specialist Consultation,CONSULTATION,Specialist OB-GYN consultation,700.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000003,CONS-SPEC-ORTHO,Orthopedic Specialist Consultation,CONSULTATION,Specialist Orthopedic assessment,600.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000004,CONS-FOLLOWUP,Follow-up Consultation,CONSULTATION,Followup visit within 7 days,250.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000005,PROC-ECG,12-Lead Electrocardiogram (ECG),DIAGNOSTIC,Standard 12-lead resting ECG with interpretation,350.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000006,PROC-GRBS,Random Blood Sugar (Glucometer),DIAGNOSTIC,Fingerstick point-of-care blood glucose test,70.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000007,PROC-DRESS-SML,Minor Wound Dressing,PROCEDURE,Antiseptic cleaning and sterile gauze dressing,150.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000008,PROC-CREPE,Crepe Bandage / Splint Application,PROCEDURE,Immobilization dressing for sprains / strains,250.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000009,PROC-INJ-IM,Intramuscular / IV Injection,PROCEDURE,Administration of prescribed injectable medication,100.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+SRV-000010,PROC-NEB,Nebulization Session,PROCEDURE,Bronchodilator aerosol nebulization (single session),150.0,0.0,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00

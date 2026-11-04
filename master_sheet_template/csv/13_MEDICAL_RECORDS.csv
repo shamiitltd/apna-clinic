@@ -1,0 +1,4 @@
+record_id,patient_id,consultation_id,record_type,title,description,document_url,record_date,created_by,created_at,updated_at
+MED-000001,PAT-000001,CON-000001,LAB_REPORT,Complete Blood Count (CBC),"Platelet 2.4L, TLC 7800, Hb 13.8 g/dL",https://drive.google.com/file/d/apna_cbc_001/view,2026-09-29,USR-000001,2026-09-29 09:15:00,2026-09-29 09:15:00
+MED-000002,PAT-000002,CON-000002,LAB_REPORT,Lipid Profile & Serum Creatinine,"Total Cholesterol 185 mg/dL, Creatinine 0.9 mg/dL",https://drive.google.com/file/d/apna_lipid_002/view,2026-09-20,USR-000001,2026-09-29 09:25:00,2026-09-29 09:25:00
+MED-000003,PAT-000003,CON-000003,RADIOLOGY,X-Ray Right Ankle AP & Lateral,No fracture or bony dislocation seen. Soft tissue edema present.,https://drive.google.com/file/d/apna_xray_003/view,2026-09-29,USR-000001,2026-09-29 09:35:00,2026-09-29 09:35:00

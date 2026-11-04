@@ -1,0 +1,4 @@
+followup_id,patient_id,consultation_id,doctor_id,due_date,status,reminder_consent,reminder_sent_at,converted_appointment_id,notes,created_at,updated_at
+FOL-000001,PAT-000001,CON-000001,DOC-000001,2026-10-06,SCHEDULED,TRUE,,,Review fever resolution and chest symptoms,2026-09-29 09:18:00,2026-09-29 09:18:00
+FOL-000002,PAT-000002,CON-000002,DOC-000001,2026-10-27,SCHEDULED,TRUE,,,Monthly BP monitoring visit,2026-09-29 09:34:00,2026-09-29 09:34:00
+FOL-000003,PAT-000003,CON-000003,DOC-000003,2026-10-06,SCHEDULED,TRUE,,,Ankle ligament healing review and weight bearing test,2026-09-29 09:36:00,2026-09-29 09:36:00

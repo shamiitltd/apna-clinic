@@ -1,0 +1,8 @@
+audit_id,timestamp,user_id,user_role,action,entity_type,entity_id,old_value,new_value,source,remarks
+AUD-000001,2026-09-29 08:35:00,USR-000003,RECEPTIONIST,PATIENT_CHECKED_IN,APPOINTMENT,APT-000001,status:SCHEDULED,"status:CHECKED_IN, token:1",Reception-PC-01,Patient arrived for consultation
+AUD-000002,2026-09-29 09:02:00,USR-000001,DOCTOR,CONSULTATION_STARTED,QUEUE,TOK-000001,queue_status:CALLED,queue_status:IN_CONSULTATION,Doctor-Chamber-01,Consultation started with Dr. Rajesh Sharma
+AUD-000003,2026-09-29 09:18:00,USR-000001,DOCTOR,CONSULTATION_COMPLETED,CONSULTATION,CON-000001,status:IN_PROGRESS,status:COMPLETED,Doctor-Chamber-01,Consultation concluded and prescription created
+AUD-000004,2026-09-29 09:20:00,USR-000004,BILLING,INVOICE_GENERATED,BILLING,INV-000001,,"total:500.00, status:UNPAID",Billing-POS-01,Invoice raised for consultation
+AUD-000005,2026-09-29 09:22:00,USR-000004,BILLING,PAYMENT_RECEIVED,PAYMENTS,PAY-000001,status:UNPAID,"amount:500.00, method:UPI, status:PAID",Billing-POS-01,GPay UPI transaction completed
+AUD-000006,2026-09-29 09:25:00,USR-000003,RECEPTIONIST,PATIENT_CHECKED_IN,APPOINTMENT,APT-000004,status:SCHEDULED,"status:CHECKED_IN, token:1",Reception-PC-01,Patient arrived for Dr. Priya Verma
+AUD-000007,2026-09-29 09:32:00,USR-000001,DOCTOR,CONSULTATION_STARTED,QUEUE,TOK-000003,queue_status:WAITING,queue_status:IN_CONSULTATION,Doctor-Chamber-03,Dr. Amit Patel called patient to procedure room

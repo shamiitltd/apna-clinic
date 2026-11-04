@@ -1,0 +1,5 @@
+room_id,room_code,room_name,room_type,floor,status,assigned_doctor_id,notes,created_at,updated_at
+ROOM-000001,CHAMBER-1,Doctor Consultation Chamber 1,CONSULTATION,Ground Floor,OCCUPIED,DOC-000001,"Equipped with exam couch, ophthalmoscope, digital BP",2026-01-01 09:00:00,2026-09-29 08:00:00
+ROOM-000002,CHAMBER-2,Doctor Consultation Chamber 2 (OB-GYN),CONSULTATION,Ground Floor,AVAILABLE,DOC-000002,"Equipped with privacy curtain, ultrasound bed, fetal Doppler",2026-01-01 09:00:00,2026-09-29 08:00:00
+ROOM-000003,PROC-ROOM,Minor OT & Procedure Room,PROCEDURE,Ground Floor,OCCUPIED,DOC-000003,"Sterile procedural room for dressings, sutures, nebulization, ECG",2026-01-01 09:00:00,2026-09-29 08:00:00
+ROOM-000004,WAITING-1,Main Patient Reception & Waiting Lounge,WAITING,Ground Floor,AVAILABLE,,Capacity 25 seats with token LED TV screen,2026-01-01 09:00:00,2026-09-29 08:00:00

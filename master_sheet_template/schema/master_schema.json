@@ -1,0 +1,416 @@
+{
+  "workbook_name": "ApnaClinic_Master_Template.xlsx",
+  "schema_version": "2.0.0",
+  "generated_at": "2026-09-29 20:40:18",
+  "total_sheets": 20,
+  "sheets": [
+    {
+      "sheet_name": "01_SETTINGS",
+      "sheet_title": "Global Clinic Settings",
+      "column_count": 8,
+      "record_count": 21,
+      "headers": [
+        "setting_id",
+        "setting_category",
+        "setting_key",
+        "setting_value",
+        "data_type",
+        "description",
+        "is_system",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "02_USERS",
+      "sheet_title": "System Users & Staff",
+      "column_count": 10,
+      "record_count": 6,
+      "headers": [
+        "user_id",
+        "username",
+        "display_name",
+        "role_id",
+        "phone",
+        "email",
+        "status",
+        "assigned_doctor_ids",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "03_ROLES",
+      "sheet_title": "Role & Permission Management",
+      "column_count": 8,
+      "record_count": 5,
+      "headers": [
+        "role_id",
+        "role_code",
+        "role_name",
+        "description",
+        "permissions_summary",
+        "status",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "04_DOCTORS",
+      "sheet_title": "Doctor Master Table",
+      "column_count": 15,
+      "record_count": 3,
+      "headers": [
+        "doctor_id",
+        "doctor_code",
+        "doctor_name",
+        "specialization",
+        "qualification",
+        "registration_number",
+        "phone",
+        "email",
+        "room_id",
+        "consultation_fee",
+        "consultation_duration_minutes",
+        "status",
+        "joining_date",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "05_PATIENTS",
+      "sheet_title": "Patient Master Table",
+      "column_count": 27,
+      "record_count": 8,
+      "headers": [
+        "patient_id",
+        "patient_code",
+        "first_name",
+        "middle_name",
+        "last_name",
+        "full_name",
+        "date_of_birth",
+        "age",
+        "gender",
+        "phone",
+        "alternate_phone",
+        "email",
+        "address",
+        "city",
+        "state",
+        "pincode",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "blood_group",
+        "registration_date",
+        "patient_status",
+        "consent_status",
+        "consent_version",
+        "created_at",
+        "updated_at",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "sheet_name": "06_APPOINTMENTS",
+      "sheet_title": "Appointments Master Table",
+      "column_count": 20,
+      "record_count": 10,
+      "headers": [
+        "appointment_id",
+        "appointment_code",
+        "patient_id",
+        "doctor_id",
+        "appointment_date",
+        "start_time",
+        "end_time",
+        "appointment_type",
+        "booking_source",
+        "status",
+        "token_number",
+        "room_id",
+        "notes",
+        "cancel_reason",
+        "reminder_consent",
+        "reminder_status",
+        "created_at",
+        "updated_at",
+        "created_by",
+        "updated_by"
+      ]
+    },
+    {
+      "sheet_name": "07_DOCTOR_SCHEDULES",
+      "sheet_title": "Doctor Weekly Schedules",
+      "column_count": 15,
+      "record_count": 12,
+      "headers": [
+        "schedule_id",
+        "doctor_id",
+        "day_of_week",
+        "start_time",
+        "end_time",
+        "slot_duration",
+        "break_start",
+        "break_end",
+        "room_id",
+        "maximum_patients",
+        "status",
+        "effective_from",
+        "effective_to",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "08_QUEUE",
+      "sheet_title": "Daily Token & Live Queue",
+      "column_count": 15,
+      "record_count": 6,
+      "headers": [
+        "queue_id",
+        "appointment_id",
+        "patient_id",
+        "doctor_id",
+        "token_number",
+        "queue_date",
+        "check_in_time",
+        "called_time",
+        "consultation_start_time",
+        "consultation_end_time",
+        "queue_status",
+        "priority",
+        "room_id",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "09_CONSULTATIONS",
+      "sheet_title": "Clinical Consultations",
+      "column_count": 15,
+      "record_count": 3,
+      "headers": [
+        "consultation_id",
+        "appointment_id",
+        "patient_id",
+        "doctor_id",
+        "chief_complaint",
+        "clinical_summary",
+        "diagnosis",
+        "advice",
+        "follow_up_required",
+        "follow_up_date",
+        "consultation_status",
+        "started_at",
+        "completed_at",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "10_BILLING",
+      "sheet_title": "Billing & Invoices",
+      "column_count": 15,
+      "record_count": 4,
+      "headers": [
+        "invoice_id",
+        "invoice_number",
+        "patient_id",
+        "appointment_id",
+        "invoice_date",
+        "subtotal",
+        "discount",
+        "tax",
+        "total_amount",
+        "paid_amount",
+        "due_amount",
+        "payment_status",
+        "notes",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "11_PAYMENTS",
+      "sheet_title": "Payment Ledger",
+      "column_count": 11,
+      "record_count": 3,
+      "headers": [
+        "payment_id",
+        "invoice_id",
+        "patient_id",
+        "payment_date",
+        "amount",
+        "payment_method",
+        "transaction_reference",
+        "payment_status",
+        "received_by",
+        "notes",
+        "created_at"
+      ]
+    },
+    {
+      "sheet_name": "12_SERVICES",
+      "sheet_title": "Services & Fee Catalog",
+      "column_count": 10,
+      "record_count": 10,
+      "headers": [
+        "service_id",
+        "service_code",
+        "service_name",
+        "category",
+        "description",
+        "default_fee",
+        "tax_rate",
+        "status",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "13_MEDICAL_RECORDS",
+      "sheet_title": "Medical Records & Diagnostic Attachments",
+      "column_count": 11,
+      "record_count": 3,
+      "headers": [
+        "record_id",
+        "patient_id",
+        "consultation_id",
+        "record_type",
+        "title",
+        "description",
+        "document_url",
+        "record_date",
+        "created_by",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "14_PRESCRIPTIONS",
+      "sheet_title": "Prescriptions (Itemized Medication)",
+      "column_count": 11,
+      "record_count": 6,
+      "headers": [
+        "prescription_id",
+        "consultation_id",
+        "patient_id",
+        "medicine_name",
+        "dosage",
+        "frequency",
+        "duration",
+        "route",
+        "instructions",
+        "quantity",
+        "created_at"
+      ]
+    },
+    {
+      "sheet_name": "15_FOLLOW_UPS",
+      "sheet_title": "Follow-ups Master Table",
+      "column_count": 12,
+      "record_count": 3,
+      "headers": [
+        "followup_id",
+        "patient_id",
+        "consultation_id",
+        "doctor_id",
+        "due_date",
+        "status",
+        "reminder_consent",
+        "reminder_sent_at",
+        "converted_appointment_id",
+        "notes",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "16_ROOMS",
+      "sheet_title": "Chambers & Procedure Rooms",
+      "column_count": 10,
+      "record_count": 4,
+      "headers": [
+        "room_id",
+        "room_code",
+        "room_name",
+        "room_type",
+        "floor",
+        "status",
+        "assigned_doctor_id",
+        "notes",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "sheet_name": "17_AUDIT_LOG",
+      "sheet_title": "System Audit Trail",
+      "column_count": 11,
+      "record_count": 7,
+      "headers": [
+        "audit_id",
+        "timestamp",
+        "user_id",
+        "user_role",
+        "action",
+        "entity_type",
+        "entity_id",
+        "old_value",
+        "new_value",
+        "source",
+        "remarks"
+      ]
+    },
+    {
+      "sheet_name": "18_NOTIFICATIONS",
+      "sheet_title": "Patient Notifications & Reminders",
+      "column_count": 12,
+      "record_count": 4,
+      "headers": [
+        "notification_id",
+        "patient_id",
+        "notification_type",
+        "recipient_contact",
+        "scheduled_at",
+        "sent_at",
+        "channel",
+        "template_name",
+        "status",
+        "delivery_status",
+        "remarks",
+        "created_at"
+      ]
+    },
+    {
+      "sheet_name": "19_REPORTING",
+      "sheet_title": "Executive KPI & Operational Reports",
+      "column_count": 5,
+      "record_count": 12,
+      "headers": [
+        "kpi_metric_id",
+        "metric_name",
+        "metric_value_formula",
+        "category",
+        "notes"
+      ]
+    },
+    {
+      "sheet_name": "20_LOOKUPS",
+      "sheet_title": "Controlled Lookup Enums",
+      "column_count": 7,
+      "record_count": 91,
+      "headers": [
+        "lookup_id",
+        "category",
+        "code",
+        "display_name",
+        "sort_order",
+        "is_active",
+        "description"
+      ]
+    }
+  ]
+}

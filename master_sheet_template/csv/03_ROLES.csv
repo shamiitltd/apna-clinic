@@ -1,0 +1,6 @@
+role_id,role_code,role_name,description,permissions_summary,status,created_at,updated_at
+ROLE-000001,ADMIN,Administrator,"Full system access, settings, user management, and security audit",ALL_PERMISSIONS,ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+ROLE-000002,RECEPTIONIST,Receptionist,"Patient check-in, token generation, appointment scheduling, queue management","PATIENT_WRITE,APPOINTMENT_WRITE,QUEUE_WRITE,BILLING_READ",ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+ROLE-000003,DOCTOR,Consulting Doctor,"Queue status, patient consultation notes, prescriptions, medical records","QUEUE_READ,CONSULTATION_WRITE,PRESCRIPTION_WRITE,RECORDS_WRITE",ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+ROLE-000004,BILLING,Billing Specialist,"Invoice generation, payment collection, receipts, cash reconciliation","BILLING_WRITE,PAYMENT_WRITE,REPORT_FINANCE",ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
+ROLE-000005,MANAGER,Clinic Manager,"Operational oversight, doctor schedule allocation, executive reporting","REPORT_ALL,SCHEDULE_WRITE,AUDIT_READ",ACTIVE,2026-01-01 09:00:00,2026-09-29 08:00:00
