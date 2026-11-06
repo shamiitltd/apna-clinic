@@ -30,6 +30,12 @@ import '../domain/enums/domain_enums.dart';
 import '../domain/entities/audit_event.dart';
 import '../domain/entities/subscription.dart';
 import '../domain/services/subscription_service.dart';
+import '../infrastructure/google/monthly_storage/data/apps_script_client.dart';
+import '../infrastructure/google/monthly_storage/data/monthly_storage_repository.dart';
+import '../infrastructure/google/monthly_storage/domain/monthly_sync_coordinator.dart';
+import '../infrastructure/google/monthly_storage/domain/patient_history_router.dart';
+import '../infrastructure/google/monthly_storage/domain/reconciliation_service.dart';
+import '../infrastructure/google/monthly_storage/monthly_storage_sync_adapter.dart';
 
 /// Global ProviderContainer reference for reliable route guard lookups and outside-of-tree resolution
 ProviderContainer? appProviderContainer;
@@ -284,6 +290,72 @@ final masterSheetSyncSchedulerProvider = Provider<MasterSheetSyncScheduler>((
     scheduler.dispose();
   });
   return scheduler;
+});
+
+/// Google Apps Script Client Provider (Monthly Storage & Partitioning)
+final appsScriptClientProvider = Provider<IAppsScriptClient>((ref) {
+  return AppsScriptClient();
+});
+
+/// Monthly Storage Repository Provider
+final monthlyStorageRepositoryProvider = Provider<MonthlyStorageRepository>((ref) {
+  final db = ref.watch(localDatabaseProvider);
+  final driveClient = ref.watch(googleDriveClientProvider);
+  final sheetsClient = ref.watch(googleSheetsClientProvider);
+  final appsScriptClient = ref.watch(appsScriptClientProvider);
+  return MonthlyStorageRepository(
+    localDb: db,
+    driveClient: driveClient,
+    sheetsClient: sheetsClient,
+    appsScriptClient: appsScriptClient,
+  );
+});
+
+/// Monthly Sync Coordinator Provider
+final monthlySyncCoordinatorProvider = Provider<MonthlySyncCoordinator>((ref) {
+  final db = ref.watch(localDatabaseProvider);
+  final repo = ref.watch(monthlyStorageRepositoryProvider);
+  return MonthlySyncCoordinator(
+    localDb: db,
+    repository: repo,
+  );
+});
+
+/// Patient History Router Provider
+final patientHistoryRouterProvider = Provider<PatientHistoryRouter>((ref) {
+  final db = ref.watch(localDatabaseProvider);
+  final repo = ref.watch(monthlyStorageRepositoryProvider);
+  return PatientHistoryRouter(
+    localDb: db,
+    repository: repo,
+  );
+});
+
+/// Monthly Storage Reconciliation Service Provider
+final monthlyStorageReconciliationServiceProvider =
+    Provider<MonthlyStorageReconciliationService>((ref) {
+  final db = ref.watch(localDatabaseProvider);
+  final repo = ref.watch(monthlyStorageRepositoryProvider);
+  return MonthlyStorageReconciliationService(
+    localDb: db,
+    repository: repo,
+  );
+});
+
+/// Monthly Storage Sync Adapter Provider (Feature-flagged coordinator)
+final monthlyStorageSyncAdapterProvider = Provider<MonthlyStorageSyncAdapter>((ref) {
+  final baseEngine = ref.watch(masterSheetSyncEngineProvider);
+  final repo = ref.watch(monthlyStorageRepositoryProvider);
+  final coordinator = ref.watch(monthlySyncCoordinatorProvider);
+  final router = ref.watch(patientHistoryRouterProvider);
+  final reconciliation = ref.watch(monthlyStorageReconciliationServiceProvider);
+  return MonthlyStorageSyncAdapter(
+    baseSyncEngine: baseEngine,
+    repository: repo,
+    coordinator: coordinator,
+    historyRouter: router,
+    reconciliationService: reconciliation,
+  );
 });
 
 /// Current Active Session State

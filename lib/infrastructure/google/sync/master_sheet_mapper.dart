@@ -260,27 +260,60 @@ class MasterSheetMapper {
   /// 06_APPOINTMENTS
   /// Canonical: [appointment_id, appointment_code, patient_id, doctor_id, appointment_date, start_time, end_time, appointment_type, booking_source, status, token_number, room_id, notes, cancel_reason, reminder_consent, reminder_status, created_at, updated_at, created_by, updated_by]
   static List<dynamic> _mapAppointments(Map<String, dynamic> r) {
+    final startIso = r['scheduled_start_at']?.toString() ??
+        r['scheduled_start']?.toString() ??
+        '';
+    final endIso = r['scheduled_end_at']?.toString() ??
+        r['scheduled_end']?.toString() ??
+        '';
+
+    String extractDate(String iso) {
+      if (iso.contains('T')) return iso.split('T').first;
+      if (iso.length >= 10) return iso.substring(0, 10);
+      return '';
+    }
+
+    String extractTime(String iso) {
+      if (iso.contains('T')) {
+        final timePart = iso.split('T').last;
+        return timePart.length >= 5 ? timePart.substring(0, 5) : timePart;
+      }
+      return '';
+    }
+
+    final apptDate = r['appointment_date']?.toString() ?? extractDate(startIso);
+    final startTime = r['start_time']?.toString() ?? extractTime(startIso);
+    final endTime = r['end_time']?.toString() ?? extractTime(endIso);
+
+    final consent = r['reminder_consent'];
+    final reminderConsentStr = (consent == 1 ||
+            consent == true ||
+            consent == '1' ||
+            consent?.toString().toUpperCase() == 'TRUE')
+        ? 'TRUE'
+        : 'FALSE';
+
     return [
       r['appointment_id'] ?? '',
       r['appointment_code'] ?? r['appointment_id'] ?? '',
       r['patient_id'] ?? '',
       r['doctor_id'] ?? '',
-      r['appointment_date'] ?? (r['scheduled_start']?.toString().split('T').first ?? ''),
-      r['start_time'] ?? '',
-      r['end_time'] ?? '',
+      apptDate,
+      startTime,
+      endTime,
       r['appointment_type'] ?? 'CONSULTATION',
       r['booking_source'] ?? 'WALKIN',
       r['status']?.toString().toUpperCase() ?? 'SCHEDULED',
       r['token_number']?.toString() ?? '',
       r['room_id'] ?? 'ROOM-01',
-      r['notes'] ?? '',
+      r['notes'] ?? r['reason_for_visit_encrypted_ref'] ?? '',
       r['cancel_reason'] ?? '',
-      r['reminder_consent']?.toString().toUpperCase() ?? 'TRUE',
+      reminderConsentStr,
       r['reminder_status'] ?? 'PENDING',
       r['created_at'] ?? '',
       r['updated_at'] ?? '',
-      r['created_by'] ?? 'SYSTEM',
-      r['updated_by'] ?? 'SYSTEM',
+      r['created_by'] ?? r['created_by_staff_id'] ?? 'SYSTEM',
+      r['updated_by'] ?? r['created_by_staff_id'] ?? 'SYSTEM',
     ];
   }
 
@@ -309,41 +342,54 @@ class MasterSheetMapper {
   /// 08_QUEUE
   /// Canonical: [queue_id, appointment_id, patient_id, doctor_id, token_number, queue_date, check_in_time, called_time, consultation_start_time, consultation_end_time, queue_status, priority, room_id, created_at, updated_at]
   static List<dynamic> _mapQueue(Map<String, dynamic> r) {
+    final rawQId = r['queue_id'] ?? r['queue_event_id'] ?? r['entity_id'] ?? '';
+    final queueId = (rawQId.toString().startsWith('qevt_'))
+        ? rawQId.toString()
+        : 'qevt_${r['visit_id'] ?? r['entity_id'] ?? 'opd'}_${r['token_number'] ?? '1'}';
+
+    final created = r['created_at'] ?? r['changed_at'] ?? DateTime.now().toUtc().toIso8601String();
+    final updated = r['updated_at'] ?? r['changed_at'] ?? created;
+    final dateStr = r['queue_date'] ?? r['visit_date_local'] ?? (created.toString().contains('T') ? created.toString().split('T').first : created.toString());
+
     return [
-      r['queue_id'] ?? r['visit_id'] ?? '',
+      queueId,
       r['appointment_id'] ?? r['appointment_id_optional'] ?? '',
       r['patient_id'] ?? '',
-      r['doctor_id'] ?? '',
+      r['doctor_id'] ?? 'doc_primary_01',
       r['token_number']?.toString() ?? '1',
-      r['queue_date'] ?? r['visit_date_local'] ?? '',
-      r['check_in_time'] ?? r['checkin_at'] ?? '',
+      dateStr,
+      r['check_in_time'] ?? r['checkin_at'] ?? created,
       r['called_time'] ?? '',
       r['consultation_start_time'] ?? r['consultation_started_at'] ?? '',
       r['consultation_end_time'] ?? r['consultation_completed_at'] ?? '',
       r['queue_status']?.toString().toUpperCase() ?? 'WAITING',
       r['priority'] ?? 'NORMAL',
       r['room_id'] ?? 'ROOM-01',
-      r['created_at'] ?? '',
-      r['updated_at'] ?? '',
+      created,
+      updated,
     ];
   }
 
   /// 09_CONSULTATIONS
   /// Canonical: [consultation_id, appointment_id, patient_id, doctor_id, chief_complaint, clinical_summary, diagnosis, advice, follow_up_required, follow_up_date, consultation_status, started_at, completed_at, created_at, updated_at]
   static List<dynamic> _mapConsultations(Map<String, dynamic> r) {
+    final followUpReq = r['follow_up_required'] == true ||
+        r['followup_due_date_optional'] != null ||
+        r['follow_up_required']?.toString().toUpperCase() == 'TRUE';
+
     return [
       r['consultation_id'] ?? r['visit_id'] ?? '',
       r['appointment_id'] ?? r['appointment_id_optional'] ?? '',
       r['patient_id'] ?? '',
       r['doctor_id'] ?? '',
-      r['chief_complaint'] ?? '',
-      r['clinical_summary'] ?? '',
+      r['chief_complaint'] ?? r['reason_for_visit_encrypted_ref'] ?? '',
+      r['clinical_summary'] ?? (r['token_number'] != null ? 'OPD Visit Token #${r['token_number']}' : ''),
       r['diagnosis'] ?? '',
       r['advice'] ?? '',
-      (r['follow_up_required'] == true || r['followup_due_date_optional'] != null) ? 'TRUE' : 'FALSE',
+      followUpReq ? 'TRUE' : 'FALSE',
       r['follow_up_date'] ?? r['followup_due_date_optional'] ?? '',
-      r['consultation_status'] ?? 'COMPLETED',
-      r['started_at'] ?? r['consultation_started_at'] ?? '',
+      r['consultation_status'] ?? r['queue_status']?.toString().toUpperCase() ?? 'COMPLETED',
+      r['started_at'] ?? r['consultation_started_at'] ?? r['checkin_at'] ?? '',
       r['completed_at'] ?? r['consultation_completed_at'] ?? '',
       r['created_at'] ?? '',
       r['updated_at'] ?? '',
@@ -366,12 +412,12 @@ class MasterSheetMapper {
       r['patient_id'] ?? '',
       r['appointment_id'] ?? r['visit_id'] ?? '',
       r['invoice_date'] ?? r['issue_date_local'] ?? '',
-      paiseToRupees(r['subtotal_minor']),
-      paiseToRupees(r['discount_minor']),
-      paiseToRupees(r['tax_minor']),
-      paiseToRupees(r['total_minor']),
-      paiseToRupees(r['paid_minor']),
-      paiseToRupees(r['balance_minor']),
+      paiseToRupees(r['subtotal_minor'] ?? r['subtotal_amount'] ?? r['subtotal']),
+      paiseToRupees(r['discount_minor'] ?? r['discount_amount'] ?? r['discount']),
+      paiseToRupees(r['tax_minor'] ?? r['tax_amount'] ?? r['tax']),
+      paiseToRupees(r['total_minor'] ?? r['total_amount'] ?? r['total']),
+      paiseToRupees(r['paid_minor'] ?? r['paid_amount'] ?? r['paid']),
+      paiseToRupees(r['balance_minor'] ?? r['due_amount'] ?? r['due']),
       r['payment_status'] ?? r['status']?.toString().toUpperCase() ?? 'PAID',
       r['notes'] ?? r['notes_nonclinical'] ?? '',
       r['created_at'] ?? '',
@@ -394,7 +440,7 @@ class MasterSheetMapper {
       r['invoice_id'] ?? '',
       r['patient_id'] ?? '',
       r['payment_date'] ?? (r['received_at']?.toString().split('T').first ?? ''),
-      paiseToRupees(r['amount_minor']),
+      paiseToRupees(r['amount_minor'] ?? r['amount']),
       r['payment_method'] ?? r['method']?.toString().toUpperCase() ?? 'CASH',
       r['transaction_reference'] ?? r['cash_upi_card_reference_optional'] ?? '',
       r['payment_status'] ?? r['status']?.toString().toUpperCase() ?? 'COMPLETED',

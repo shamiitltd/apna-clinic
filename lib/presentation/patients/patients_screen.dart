@@ -19,6 +19,7 @@ import '../shared/widgets/app_scaffold.dart';
 import '../shared/widgets/unauthorized_screen.dart';
 import '../../application/providers.dart';
 import '../../core/utils/phone_normalizer.dart';
+import '../../infrastructure/google/monthly_storage/domain/patient_history_router.dart';
 import '../shared/dialogs/create_visit_dialog.dart';
 
 class PatientsScreen extends ConsumerStatefulWidget {
@@ -966,6 +967,10 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
           Navigator.of(ctx).pop();
           _openAuditHistoryDialog(patient);
         },
+        onViewTimeline: () {
+          Navigator.of(ctx).pop();
+          _openMonthlyHistoryDialog(patient);
+        },
         onDelete: () {
           Navigator.of(ctx).pop();
           _deletePatient(patient);
@@ -975,6 +980,13 @@ class _PatientsScreenState extends ConsumerState<PatientsScreen> {
           _createVisitForPatient(patient);
         },
       ),
+    );
+  }
+
+  void _openMonthlyHistoryDialog(Patient patient) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => _PatientMonthlyHistoryDialog(patient: patient),
     );
   }
 
@@ -1837,6 +1849,7 @@ class _PatientProfileDialog extends StatelessWidget {
   final bool isOwner;
   final VoidCallback onEdit;
   final VoidCallback onViewHistory;
+  final VoidCallback onViewTimeline;
   final VoidCallback onDelete;
   final VoidCallback onCreateVisit;
 
@@ -1845,6 +1858,7 @@ class _PatientProfileDialog extends StatelessWidget {
     required this.isOwner,
     required this.onEdit,
     required this.onViewHistory,
+    required this.onViewTimeline,
     required this.onDelete,
     required this.onCreateVisit,
   });
@@ -1971,6 +1985,17 @@ class _PatientProfileDialog extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
+                      OutlinedButton.icon(
+                        onPressed: onViewTimeline,
+                        icon: const Icon(Icons.history_toggle_off, size: 16),
+                        label: const Text('Monthly History'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2563EB),
+                          side: const BorderSide(color: Color(0xFF2563EB)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          textStyle: const TextStyle(fontSize: 12),
+                        ),
+                      ),
                       OutlinedButton.icon(
                         onPressed: onViewHistory,
                         icon: const Icon(Icons.history, size: 16),
@@ -2705,4 +2730,224 @@ class _PatientAuditHistoryDialogState extends ConsumerState<_PatientAuditHistory
     );
   }
 }
+
+class _PatientMonthlyHistoryDialog extends ConsumerStatefulWidget {
+  final Patient patient;
+
+  const _PatientMonthlyHistoryDialog({required this.patient});
+
+  @override
+  ConsumerState<_PatientMonthlyHistoryDialog> createState() => _PatientMonthlyHistoryDialogState();
+}
+
+class _PatientMonthlyHistoryDialogState extends ConsumerState<_PatientMonthlyHistoryDialog> {
+  bool _isLoading = true;
+  PatientMonthlyHistoryResult? _result;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTimeline();
+  }
+
+  Future<void> _loadTimeline() async {
+    try {
+      final router = ref.read(patientHistoryRouterProvider);
+      final res = await router.getPatientHistory(
+        clinicId: widget.patient.clinicId,
+        patientId: widget.patient.patientId,
+      );
+      if (mounted) {
+        setState(() {
+          _result = res;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final dialogWidth = screenWidth >= 640 ? 650.0 : double.maxFinite;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: dialogWidth,
+        constraints: BoxConstraints(
+          maxWidth: 650,
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.auto_stories_outlined, color: Color(0xFF2563EB), size: 28),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Cross-Month Patient History',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${widget.patient.fullName} (${widget.patient.patientNumber})',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_result != null && _result!.recordedMonths.isNotEmpty) ...[
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  const Text('Active Months: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ..._result!.recordedMonths.map(
+                    (m) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                      ),
+                      child: Text(
+                        m,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1D4ED8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? Center(child: Text('Error loading history: $_error'))
+                      : (_result == null || _result!.timeline.isEmpty)
+                          ? const Center(
+                              child: Text(
+                                'No historical visits or appointments found for this patient.',
+                                style: TextStyle(color: AppColors.textSecondary),
+                              ),
+                            )
+                          : ListView.separated(
+                              itemCount: _result!.timeline.length,
+                              separatorBuilder: (_, __) => const Divider(height: 16),
+                              itemBuilder: (context, index) {
+                                final item = _result!.timeline[index];
+                                final iconData = item.type == 'visit'
+                                    ? Icons.medical_services_outlined
+                                    : item.type == 'appointment'
+                                        ? Icons.calendar_today_outlined
+                                        : item.type == 'invoice'
+                                            ? Icons.receipt_outlined
+                                            : Icons.payment_outlined;
+                                final iconColor = item.type == 'visit'
+                                    ? const Color(0xFF0F766E)
+                                    : item.type == 'appointment'
+                                        ? const Color(0xFF2563EB)
+                                        : const Color(0xFFD97706);
+
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: iconColor.withValues(alpha: 0.12),
+                                      child: Icon(iconData, size: 18, color: iconColor),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                item.title,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF1F5F9),
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  item.yearMonth,
+                                                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            item.subtitle,
+                                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                          ),
+                                          if (item.date.isNotEmpty) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Date: ${item.date}',
+                                              style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 

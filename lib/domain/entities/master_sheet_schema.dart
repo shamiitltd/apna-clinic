@@ -27,6 +27,50 @@ class MasterSheetSchema {
     '18_NOTIFICATIONS',
     '19_REPORTING',
     '20_LOOKUPS',
+    // Monthly Storage Master Extensions (Feature TRD Section 5.2)
+    'Spreadsheet_Registry',
+    'Patient_History_Index',
+  ];
+
+  /// Canonical Monthly Transaction Tab Names (Feature TRD Section 5.3)
+  static const List<String> monthlyTransactionTabNames = [
+    'Appointments',
+    'Visits',
+    'Billing',
+    'Payments',
+    'Queue_Events',
+  ];
+
+  /// Map of Monthly Transaction Tab Name to canonical header columns (Feature TRD Section 5.1 & 5.3)
+  static Map<String, List<String>> get monthlyTransactionHeaders => {
+    'Appointments': canonicalHeaders['06_APPOINTMENTS']!,
+    'Visits': canonicalHeaders['09_CONSULTATIONS']!,
+    'Billing': canonicalHeaders['10_BILLING']!,
+    'Payments': canonicalHeaders['11_PAYMENTS']!,
+    'Queue_Events': canonicalHeaders['08_QUEUE']!,
+  };
+
+  /// Canonical headers for Monthly Storage Extensions (TRD Section 5.2)
+  static const List<String> spreadsheetRegistryHeaders = [
+    'clinic_id',
+    'year_month',
+    'spreadsheet_id',
+    'status',
+    'schema_version',
+    'created_at',
+    'created_by',
+    'last_verified_at',
+  ];
+
+  static const List<String> patientHistoryIndexHeaders = [
+    'clinic_id',
+    'patient_id',
+    'year_month',
+    'record_type',
+    'first_record_at',
+    'last_record_at',
+    'record_count',
+    'last_updated_at',
   ];
 
   /// Canonical headers per worksheet in exact column sequence
@@ -319,6 +363,8 @@ class MasterSheetSchema {
       'is_active',
       'description',
     ],
+    'Spreadsheet_Registry': spreadsheetRegistryHeaders,
+    'Patient_History_Index': patientHistoryIndexHeaders,
   };
 
   /// Canonical initial lookup records for 20_LOOKUPS

@@ -85,6 +85,9 @@ class LocalDatabase {
     'Day_Close',
     'day_close',
     'Lookup_Config',
+    // Monthly Google Sheets Storage & Registry (Feature PRD/TRD v1.1)
+    'Spreadsheet_Registry',
+    'Patient_History_Index',
     // Local-only tables
     'sync_outbox',
     'sync_inbox',

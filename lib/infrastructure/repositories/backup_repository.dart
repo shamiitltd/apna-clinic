@@ -56,4 +56,12 @@ class BackupRepository implements IBackupRepository {
       await _db.upsert('backup_manifests', backupId, updated);
     }
   }
+
+  /// Returns all active monthly transaction workbooks for clinic backup inclusion
+  Future<List<Map<String, dynamic>>> getActiveMonthlyWorkbooks(String clinicId) async {
+    return _db.query(
+      'Spreadsheet_Registry',
+      where: (r) => r['clinic_id'] == clinicId && r['status'] == 'ACTIVE',
+    );
+  }
 }

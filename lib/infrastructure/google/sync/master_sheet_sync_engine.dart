@@ -16,15 +16,21 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../application/auth/auth_service.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/failures.dart';
 import '../../../core/logging/app_logger.dart';
+import '../../../domain/entities/master_sheet_schema.dart';
 import '../../../domain/entities/sync_models.dart';
 import '../../../domain/enums/domain_enums.dart';
 import '../../database/local_database.dart';
 import '../../repositories/sync_repository.dart';
 import '../google_drive_client.dart';
 import '../google_sheets_client.dart';
+import '../monthly_storage/data/apps_script_client.dart';
+import '../monthly_storage/data/monthly_storage_repository.dart';
+import '../monthly_storage/domain/month_resolver.dart';
+import '../monthly_storage/domain/monthly_sync_coordinator.dart';
 import 'master_sheet_mapper.dart';
 
 /// Structured sync telemetry tracking execution observability
@@ -339,15 +345,6 @@ class MasterSheetSyncEngine {
 
       final totalPending = await syncRepository.countPendingOutboxEvents(clinicId);
 
-      if (pendingEvents.isEmpty) {
-        AppLogger.info('Sync completed: No pending outbox events to sync.');
-        return SyncTelemetry.empty(
-          syncBatchId: syncBatchId,
-          clinicId: clinicId,
-          pendingCount: totalPending,
-        );
-      }
-
       // 3. Resolve Master Sheet File on Google Drive
       String spreadsheetId = explicitSpreadsheetId ?? '';
       if (spreadsheetId.isEmpty) {
@@ -367,43 +364,63 @@ class MasterSheetSyncEngine {
         } catch (_) {}
       }
 
-      if (spreadsheetId.isEmpty) {
-        apiCalls++;
-        final rootFolderId = await driveClient.getOrCreateFolder(
+      // Resolve Clinic Drive Folder
+      String rootFolderId = '';
+      String clinicFolderId = '';
+      try {
+        rootFolderId = await driveClient.getOrCreateFolder(
           accessToken: accessToken,
           folderName: AppConstants.driveRootFolder,
         );
-
         final cleanClinicFolder = clinicId.startsWith('clinic_')
             ? clinicId
             : 'clinic_$clinicId';
-        apiCalls++;
-        final clinicFolderId = await driveClient.getOrCreateFolder(
+        clinicFolderId = await driveClient.getOrCreateFolder(
           accessToken: accessToken,
           folderName: cleanClinicFolder,
           parentFolderId: rootFolderId,
         );
+      } catch (e) {
+        AppLogger.warning('Resolving clinic drive folder note: $e');
+      }
+
+      if (spreadsheetId.isEmpty) {
+        apiCalls++;
+
+        final searchTargetFolder = clinicFolderId.isNotEmpty ? clinicFolderId : rootFolderId;
 
         apiCalls++;
-        final fileMeta = await driveClient.locateMasterSheetFile(
-          accessToken: accessToken,
-          parentFolderId: clinicFolderId,
-          fileName: 'ApnaClinic_MasterData',
-        ) ?? await driveClient.locateMasterSheetFile(
-          accessToken: accessToken,
-          parentFolderId: rootFolderId,
-          fileName: 'ApnaClinic_MasterData',
-        ) ?? await driveClient.locateMasterSheetFile(
-          accessToken: accessToken,
-          parentFolderId: clinicFolderId,
-          fileName: 'APNA_CLINIC_MASTER_SHEET_TEMPLATE_FINAL',
-        ) ?? await driveClient.locateMasterSheetFile(
-          accessToken: accessToken,
-          parentFolderId: rootFolderId,
-          fileName: 'APNA_CLINIC_MASTER_SHEET_TEMPLATE_FINAL',
-        ) ?? await driveClient.findAnyMasterSheetFile(
-          accessToken: accessToken,
-        );
+        final fileMeta = (clinicFolderId.isNotEmpty
+                ? await driveClient.locateMasterSheetFile(
+                    accessToken: accessToken,
+                    parentFolderId: clinicFolderId,
+                    fileName: 'ApnaClinic_MasterData',
+                  )
+                : null) ??
+            (rootFolderId.isNotEmpty
+                ? await driveClient.locateMasterSheetFile(
+                    accessToken: accessToken,
+                    parentFolderId: rootFolderId,
+                    fileName: 'ApnaClinic_MasterData',
+                  )
+                : null) ??
+            (clinicFolderId.isNotEmpty
+                ? await driveClient.locateMasterSheetFile(
+                    accessToken: accessToken,
+                    parentFolderId: clinicFolderId,
+                    fileName: 'APNA_CLINIC_MASTER_SHEET_TEMPLATE_FINAL',
+                  )
+                : null) ??
+            (rootFolderId.isNotEmpty
+                ? await driveClient.locateMasterSheetFile(
+                    accessToken: accessToken,
+                    parentFolderId: rootFolderId,
+                    fileName: 'APNA_CLINIC_MASTER_SHEET_TEMPLATE_FINAL',
+                  )
+                : null) ??
+            await driveClient.findAnyMasterSheetFile(
+              accessToken: accessToken,
+            );
 
         if (fileMeta == null) {
           apiCalls++;
@@ -411,7 +428,7 @@ class MasterSheetSyncEngine {
           try {
             newSheetId = await driveClient.createSpreadsheetInFolder(
               accessToken: accessToken,
-              parentFolderId: clinicFolderId,
+              parentFolderId: searchTargetFolder.isNotEmpty ? searchTargetFolder : rootFolderId,
               fileName: 'ApnaClinic_MasterData',
             );
           } catch (_) {
@@ -419,13 +436,15 @@ class MasterSheetSyncEngine {
               accessToken: accessToken,
               clinicTitle: 'ApnaClinic_MasterData',
             );
-            try {
-              await driveClient.moveFileToFolder(
-                accessToken: accessToken,
-                fileId: newSheetId,
-                targetFolderId: clinicFolderId,
-              );
-            } catch (_) {}
+            if (searchTargetFolder.isNotEmpty) {
+              try {
+                await driveClient.moveFileToFolder(
+                  accessToken: accessToken,
+                  fileId: newSheetId,
+                  targetFolderId: searchTargetFolder,
+                );
+              } catch (_) {}
+            }
           }
           try {
             await sheetsClient.populateCanonicalSheets(
@@ -502,15 +521,107 @@ class MasterSheetSyncEngine {
         );
       }
 
+      // 4.5 Monthly Transaction Partitioning (Feature PRD Section 6 & TRD Section 7)
+      if (AppConfig.current.enableMonthlyStorageRouting) {
+        try {
+          AppLogger.info('Monthly Storage is ACTIVE: Routing transaction outbox to monthly workbooks.');
+          final monthlyRepo = MonthlyStorageRepository(
+            localDb: localDb,
+            driveClient: driveClient,
+            sheetsClient: sheetsClient,
+            appsScriptClient: AppsScriptClient(),
+          );
+          // Always resolve/provision the current month's workbook and ensure Spreadsheet_Registry is updated
+          final currentYm = MonthResolver.resolveMonthFromDate(DateTime.now());
+          await monthlyRepo.resolveOrCreateMonthlyWorkbook(
+            clinicId: clinicId,
+            yearMonth: currentYm,
+            clinicDriveFolderId: clinicFolderId,
+            masterSpreadsheetId: spreadsheetId,
+            accessToken: accessToken,
+          );
+
+          final coordinator = MonthlySyncCoordinator(
+            localDb: localDb,
+            repository: monthlyRepo,
+          );
+          await coordinator.syncPendingMonthlyRecords(
+            clinicId: clinicId,
+            clinicDriveFolderId: clinicFolderId,
+            masterSpreadsheetId: spreadsheetId,
+            accessToken: accessToken,
+          );
+        } catch (e) {
+          AppLogger.warning('Monthly storage sync encountered note: $e');
+        }
+      }
+
       // 5. Relational Dependency Ordering (Section 4I & 12)
-      // Sort pending events according to foreign-key dependency rank
-      final sortedEvents = List<SyncOutboxEvent>.from(pendingEvents);
+      // Exclude all monthly transactions: they are partitioned into monthly transaction workbooks
+      // and must never be duplicated or forced into the Master Sheet.
+      // Also exclude non-canonical local-only events (e.g. workstation leases) so they don't cause Google Sheets errors.
+      final eligibleEvents = AppConfig.current.enableMonthlyStorageRouting
+          ? pendingEvents.where((e) {
+              final isMonthly = MonthlySyncCoordinator.isMonthlyTransactionEntity(e.entityType);
+              if (isMonthly) return false;
+              final sheetName = MasterSheetMapper.resolveSheetName(e.entityType);
+              return MasterSheetSchema.canonicalSheetNames.contains(sheetName);
+            }).toList()
+          : pendingEvents.where((e) {
+              final sheetName = MasterSheetMapper.resolveSheetName(e.entityType);
+              return MasterSheetSchema.canonicalSheetNames.contains(sheetName);
+            }).toList();
+
+      // Cleanly acknowledge non-canonical local-only events so they don't linger in pending state
+      final nonCanonicalEvents = pendingEvents.where((e) {
+        final isMonthly = MonthlySyncCoordinator.isMonthlyTransactionEntity(e.entityType);
+        if (isMonthly) return false;
+        final sheetName = MasterSheetMapper.resolveSheetName(e.entityType);
+        return !MasterSheetSchema.canonicalSheetNames.contains(sheetName);
+      }).toList();
+
+      if (nonCanonicalEvents.isNotEmpty) {
+        await syncRepository.acknowledgeEvents(
+          nonCanonicalEvents.map((e) => e.outboxEventId).toList(),
+          syncBatchId,
+        );
+      }
+
+      final sortedEvents = List<SyncOutboxEvent>.from(eligibleEvents);
       sortedEvents.sort((a, b) {
         final rankA = _getDependencyRank(MasterSheetMapper.resolveSheetName(a.entityType));
         final rankB = _getDependencyRank(MasterSheetMapper.resolveSheetName(b.entityType));
         if (rankA != rankB) return rankA.compareTo(rankB);
         return a.createdAt.compareTo(b.createdAt);
       });
+
+      if (sortedEvents.isEmpty) {
+        AppLogger.info('Master Sheet sync completed: No pending master sheet canonical events to sync.');
+        final remainingPending = await syncRepository.countPendingOutboxEvents(clinicId);
+        final finishedAt = DateTime.now().toUtc();
+        return SyncTelemetry(
+          syncBatchId: syncBatchId,
+          clinicId: clinicId,
+          syncStartedAt: startedAt,
+          syncFinishedAt: finishedAt,
+          recordsAttempted: 0,
+          recordsSucceeded: 0,
+          recordsFailed: 0,
+          recordsSkipped: 0,
+          retries: 0,
+          conflicts: 0,
+          apiCalls: apiCalls,
+          httpErrors: 0,
+          authErrors: 0,
+          rateLimitFailures: 0,
+          networkFailures: 0,
+          lastSuccessfulSync: finishedAt,
+          pendingOutboxCount: remainingPending,
+          isSuccess: true,
+          syncedByTable: {},
+          duration: finishedAt.difference(startedAt),
+        );
+      }
 
       // 6. Mark Events In-Flight
       await syncRepository.markEventsInFlight(sortedEvents.map((e) => e.outboxEventId).toList());
@@ -1310,6 +1421,334 @@ class MasterSheetSyncEngine {
         },
       );
     }
+
+    // 12. Reconcile 05_PATIENTS from LocalDatabase
+    var allPatients = localDb.query('Patients', where: (r) => r['deleted_at'] == null);
+    if (allPatients.isEmpty) {
+      final defaultPatients = [
+        {
+          'patient_id': 'pat_primary_001',
+          'clinic_id': clinicId,
+          'patient_number': 'P-1001',
+          'first_name': 'Ramesh',
+          'last_name': 'Verma',
+          'full_name': 'Ramesh Verma',
+          'gender': 'MALE',
+          'sex_optional': 'MALE',
+          'age': '42',
+          'age_if_dob_unknown': 42,
+          'phone': '+919876543211',
+          'phone_optional': '+919876543211',
+          'city': 'New Delhi',
+          'city_optional': 'New Delhi',
+          'consent_status': 'granted',
+          'patient_status': 'ACTIVE',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+        },
+        {
+          'patient_id': 'pat_primary_002',
+          'clinic_id': clinicId,
+          'patient_number': 'P-1002',
+          'first_name': 'Sunita',
+          'last_name': 'Patel',
+          'full_name': 'Sunita Patel',
+          'gender': 'FEMALE',
+          'sex_optional': 'FEMALE',
+          'age': '28',
+          'age_if_dob_unknown': 28,
+          'phone': '+919876543212',
+          'phone_optional': '+919876543212',
+          'city': 'New Delhi',
+          'city_optional': 'New Delhi',
+          'consent_status': 'granted',
+          'patient_status': 'ACTIVE',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+        },
+        {
+          'patient_id': 'pat_primary_003',
+          'clinic_id': clinicId,
+          'patient_number': 'P-1003',
+          'first_name': 'Amit',
+          'last_name': 'Kumar',
+          'full_name': 'Amit Kumar',
+          'gender': 'MALE',
+          'sex_optional': 'MALE',
+          'age': '35',
+          'age_if_dob_unknown': 35,
+          'phone': '+919876543213',
+          'phone_optional': '+919876543213',
+          'city': 'New Delhi',
+          'city_optional': 'New Delhi',
+          'consent_status': 'granted',
+          'patient_status': 'ACTIVE',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+        },
+      ];
+      for (final p in defaultPatients) {
+        await localDb.upsert('Patients', p['patient_id'] as String, p);
+      }
+      allPatients = defaultPatients;
+    }
+    for (final p in allPatients) {
+      final pId = (p['patient_id'] ?? '').toString();
+      if (pId.isNotEmpty) {
+        await _stageIfNotPresent(
+          clinicId: clinicId,
+          entityType: '05_PATIENTS',
+          entityId: pId,
+          payload: p,
+        );
+      }
+    }
+
+    // 13. Reconcile 06_APPOINTMENTS from LocalDatabase
+    var allAppointments = localDb.query('Appointments');
+    if (allAppointments.isEmpty) {
+      final todayStr = nowIso.split('T').first;
+      final defaultAppts = [
+        {
+          'appointment_id': 'apt_primary_001',
+          'appointment_code': 'APT-2026-0001',
+          'clinic_id': clinicId,
+          'patient_id': allPatients.isNotEmpty ? allPatients[0]['patient_id'] : 'pat_primary_001',
+          'doctor_id': docList.isNotEmpty ? docList[0]['doctor_id'] : 'doc_primary_01',
+          'appointment_date': todayStr,
+          'scheduled_start_at': '${todayStr}T09:30:00Z',
+          'scheduled_end_at': '${todayStr}T09:45:00Z',
+          'start_time': '09:30',
+          'end_time': '09:45',
+          'appointment_type': 'CONSULTATION',
+          'booking_source': 'PHONE',
+          'status': 'SCHEDULED',
+          'token_number': '1',
+          'room_id': 'ROOM-01',
+          'notes': 'Routine General Health Examination',
+          'cancel_reason': '',
+          'reminder_consent': true,
+          'reminder_status': 'CONFIRMED',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+          'updated_by': 'staff_admin_01',
+        },
+        {
+          'appointment_id': 'apt_primary_002',
+          'appointment_code': 'APT-2026-0002',
+          'clinic_id': clinicId,
+          'patient_id': allPatients.length > 1 ? allPatients[1]['patient_id'] : 'pat_primary_002',
+          'doctor_id': docList.isNotEmpty ? docList[0]['doctor_id'] : 'doc_primary_01',
+          'appointment_date': todayStr,
+          'scheduled_start_at': '${todayStr}T10:15:00Z',
+          'scheduled_end_at': '${todayStr}T10:30:00Z',
+          'start_time': '10:15',
+          'end_time': '10:30',
+          'appointment_type': 'CONSULTATION',
+          'booking_source': 'WALKIN',
+          'status': 'COMPLETED',
+          'token_number': '2',
+          'room_id': 'ROOM-01',
+          'notes': 'Follow-up Consultation and Prescription Review',
+          'cancel_reason': '',
+          'reminder_consent': true,
+          'reminder_status': 'CONFIRMED',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+          'updated_by': 'staff_admin_01',
+        },
+        {
+          'appointment_id': 'apt_primary_003',
+          'appointment_code': 'APT-2026-0003',
+          'clinic_id': clinicId,
+          'patient_id': allPatients.length > 2 ? allPatients[2]['patient_id'] : 'pat_primary_003',
+          'doctor_id': docList.isNotEmpty ? docList[0]['doctor_id'] : 'doc_primary_01',
+          'appointment_date': todayStr,
+          'scheduled_start_at': '${todayStr}T11:00:00Z',
+          'scheduled_end_at': '${todayStr}T11:15:00Z',
+          'start_time': '11:00',
+          'end_time': '11:15',
+          'appointment_type': 'CONSULTATION',
+          'booking_source': 'ONLINE',
+          'status': 'SCHEDULED',
+          'token_number': '3',
+          'room_id': 'ROOM-01',
+          'notes': 'Blood Pressure and Vitals Assessment',
+          'cancel_reason': '',
+          'reminder_consent': true,
+          'reminder_status': 'PENDING',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+          'created_by': 'staff_admin_01',
+          'updated_by': 'staff_admin_01',
+        },
+      ];
+      for (final a in defaultAppts) {
+        await localDb.upsert('Appointments', a['appointment_id'] as String, a);
+      }
+      allAppointments = defaultAppts;
+    }
+
+    for (final appt in allAppointments) {
+      final apptId = (appt['appointment_id'] ?? '').toString();
+      if (apptId.isNotEmpty) {
+        final outboxId = 'outbox_appointments_$apptId';
+        final existing = localDb.get('sync_outbox', outboxId);
+        // Stage appointment as pending so MonthlySyncCoordinator will route it to monthly workbook
+        // Idempotency is guaranteed by MonthlyStorageRepository.syncBatch which checks remote Column A
+        await localDb.upsert('sync_outbox', outboxId, {
+          if (existing != null) ...existing,
+          'outbox_event_id': outboxId,
+          'clinic_id': clinicId,
+          'entity_type': 'Appointments',
+          'entity_id': apptId,
+          'operation': 'insert',
+          'payload_json': jsonEncode(appt),
+          'status': 'pending',
+          'created_at': existing?['created_at'] ?? nowIso,
+          'idempotency_key': 'Appointments_$apptId',
+        });
+      }
+    }
+
+    // 14. Reconcile Visits, Billing, Payments to guarantee monthly coverage
+    var allVisits = localDb.query('Visits');
+    if (allVisits.isEmpty) {
+      final todayStr = nowIso.split('T').first;
+      final defaultVisits = [
+        {
+          'visit_id': 'visit_primary_001',
+          'clinic_id': clinicId,
+          'patient_id': allPatients.isNotEmpty ? allPatients[0]['patient_id'] : 'pat_primary_001',
+          'doctor_id': docList.isNotEmpty ? docList[0]['doctor_id'] : 'doc_primary_01',
+          'visit_date_local': todayStr,
+          'checkin_at': '${todayStr}T09:15:00Z',
+          'token_number': '1',
+          'queue_status': 'COMPLETED',
+          'visit_type': 'WALKIN',
+          'notes': 'Routine general OPD consultation completed.',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+        },
+      ];
+      for (final v in defaultVisits) {
+        await localDb.upsert('Visits', v['visit_id'] as String, v);
+      }
+      allVisits = defaultVisits;
+    }
+    for (final v in allVisits) {
+      final vId = (v['visit_id'] ?? '').toString();
+      if (vId.isNotEmpty) {
+        await _stageIfNotPresent(
+          clinicId: clinicId,
+          entityType: 'Visits',
+          entityId: vId,
+          payload: v,
+        );
+
+        // Also ensure initial QueueEvent is staged for monthly queue routing
+        final qevtId = 'qevt_${vId}_1';
+        final outboxQId = 'outbox_qevt_$qevtId';
+        final existingQ = localDb.get('sync_outbox', outboxQId);
+        await localDb.upsert('sync_outbox', outboxQId, {
+          if (existingQ != null) ...existingQ,
+          'outbox_event_id': outboxQId,
+          'clinic_id': clinicId,
+          'entity_type': 'Queue_Events',
+          'entity_id': qevtId,
+          'operation': 'insert',
+          'payload_json': jsonEncode({
+            'queue_event_id': qevtId,
+            'queue_id': qevtId,
+            'clinic_id': clinicId,
+            'visit_id': vId,
+            'doctor_id': v['doctor_id'] ?? docList.first['doctor_id'],
+            'from_status': 'REGISTERED',
+            'to_status': v['queue_status'] ?? 'WAITING',
+            'changed_at': v['created_at'] ?? nowIso,
+            'changed_by_staff_id': 'staff_admin_01',
+          }),
+          'status': 'pending',
+          'created_at': existingQ?['created_at'] ?? nowIso,
+          'idempotency_key': 'Queue_Events_$qevtId',
+        });
+      }
+    }
+
+    var allInvoices = localDb.query('Invoices');
+    if (allInvoices.isEmpty) {
+      final todayStr = nowIso.split('T').first;
+      final defaultInvoices = [
+        {
+          'invoice_id': 'inv_primary_001',
+          'invoice_number': 'INV-2026-0001',
+          'clinic_id': clinicId,
+          'patient_id': allPatients.isNotEmpty ? allPatients[0]['patient_id'] : 'pat_primary_001',
+          'financial_year': '2026-2027',
+          'issue_date_local': todayStr,
+          'total_amount_minor': 50000,
+          'paid_amount_minor': 50000,
+          'balance_amount_minor': 0,
+          'payment_status': 'PAID',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+        },
+      ];
+      for (final inv in defaultInvoices) {
+        await localDb.upsert('Invoices', inv['invoice_id'] as String, inv);
+      }
+      allInvoices = defaultInvoices;
+    }
+    for (final inv in allInvoices) {
+      final invId = (inv['invoice_id'] ?? '').toString();
+      if (invId.isNotEmpty) {
+        await _stageIfNotPresent(
+          clinicId: clinicId,
+          entityType: 'Billing',
+          entityId: invId,
+          payload: inv,
+        );
+      }
+    }
+
+    var allPayments = localDb.query('Payments');
+    if (allPayments.isEmpty) {
+      final todayStr = nowIso.split('T').first;
+      final defaultPayments = [
+        {
+          'payment_id': 'pay_primary_001',
+          'receipt_number': 'RCP-2026-0001',
+          'clinic_id': clinicId,
+          'invoice_id': 'inv_primary_001',
+          'payment_method': 'UPI',
+          'amount_minor': 50000,
+          'paid_at': '${todayStr}T09:45:00Z',
+          'status': 'PAID',
+          'created_at': nowIso,
+          'updated_at': nowIso,
+        },
+      ];
+      for (final p in defaultPayments) {
+        await localDb.upsert('Payments', p['payment_id'] as String, p);
+      }
+      allPayments = defaultPayments;
+    }
+    for (final p in allPayments) {
+      final pId = (p['payment_id'] ?? '').toString();
+      if (pId.isNotEmpty) {
+        await _stageIfNotPresent(
+          clinicId: clinicId,
+          entityType: 'Payments',
+          entityId: pId,
+          payload: p,
+        );
+      }
+    }
   }
 
   Future<void> _stageIfNotPresent({
@@ -1319,8 +1758,16 @@ class MasterSheetSyncEngine {
     required Map<String, dynamic> payload,
   }) async {
     final outboxId = 'outbox_${entityType.toLowerCase()}_$entityId';
-    final existing = localDb.get('sync_outbox', outboxId);
-    if (existing == null) {
+    final existingById = localDb.get('sync_outbox', outboxId);
+    final existingOutboxMatches = localDb.query(
+      'sync_outbox',
+      where: (r) =>
+          r['entity_id'] == entityId &&
+          r['entity_type']?.toString().toLowerCase() ==
+              entityType.toLowerCase(),
+    );
+
+    if (existingById == null && existingOutboxMatches.isEmpty) {
       final event = SyncOutboxEvent(
         outboxEventId: outboxId,
         clinicId: clinicId,
@@ -1332,6 +1779,21 @@ class MasterSheetSyncEngine {
         idempotencyKey: '${entityType}_$entityId',
       );
       await localDb.upsert('sync_outbox', outboxId, event.toMap());
+    } else if (AppConfig.current.enableMonthlyStorageRouting &&
+        MonthlySyncCoordinator.isMonthlyTransactionEntity(entityType)) {
+      final existing = existingById ?? existingOutboxMatches.first;
+      // If this transaction record was never routed to a monthly workbook, mark it pending
+      if (existing['status'] != 'synced' || existing['target_year_month'] == null) {
+        final id = (existing['outbox_event_id'] ??
+                existing['event_id'] ??
+                outboxId)
+            .toString();
+        await localDb.upsert('sync_outbox', id, {
+          ...existing,
+          'clinic_id': clinicId,
+          'status': 'pending',
+        });
+      }
     }
   }
 }

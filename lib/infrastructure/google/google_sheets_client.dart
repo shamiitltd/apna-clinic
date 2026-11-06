@@ -402,6 +402,171 @@ class GoogleSheetsClient {
     }
   }
 
+  /// Creates a spreadsheet with specific sheets and their Row 1 canonical headers in a single atomic call
+  Future<String> createSpreadsheetWithSheets({
+    required String accessToken,
+    required String title,
+    required Map<String, List<String>> sheetsWithHeaders,
+  }) async {
+    _validateParams(accessToken, 'new');
+
+    final sheetsPayload = sheetsWithHeaders.entries.map((entry) {
+      final colCount = entry.value.length < 10 ? 10 : entry.value.length;
+      return {
+        'properties': {
+          'title': entry.key,
+          'gridProperties': {
+            'rowCount': 1000,
+            'columnCount': colCount,
+            'frozenRowCount': 1,
+          },
+        },
+        'data': [
+          {
+            'startRow': 0,
+            'startColumn': 0,
+            'rowData': [
+              {
+                'values': entry.value
+                    .map(
+                      (h) => {
+                        'userEnteredValue': {'stringValue': h},
+                      },
+                    )
+                    .toList(),
+              },
+            ],
+          },
+        ],
+      };
+    }).toList();
+
+    final body = jsonEncode({
+      'properties': {'title': title},
+      'sheets': sheetsPayload,
+    });
+
+    final response = await _httpClient.post(
+      Uri.parse(_sheetsBaseUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final spreadsheetId = data['spreadsheetId'] as String;
+      AppLogger.info('Successfully created Google Sheet "$title": $spreadsheetId');
+      return spreadsheetId;
+    } else {
+      _handleHttpError(response, 'create spreadsheet with sheets');
+    }
+  }
+
+  /// Ensures that specified worksheets exist in a spreadsheet and have their Row 1 headers populated
+  Future<void> ensureSheetsWithHeaders({
+    required String accessToken,
+    required String spreadsheetId,
+    required Map<String, List<String>> sheetsWithHeaders,
+  }) async {
+    _validateParams(accessToken, spreadsheetId);
+    if (sheetsWithHeaders.isEmpty) return;
+
+    try {
+      final metadata = await getSpreadsheetMetadata(
+        accessToken: accessToken,
+        spreadsheetId: spreadsheetId,
+      );
+
+      final existingSheetNames = metadata.sheetNames;
+      final updateRequests = <Map<String, dynamic>>[];
+
+      for (final name in sheetsWithHeaders.keys) {
+        final colCount = sheetsWithHeaders[name]?.length ?? 20;
+        final targetCols = colCount < 26 ? 26 : colCount;
+
+        if (!existingSheetNames.contains(name)) {
+          updateRequests.add({
+            'addSheet': {
+              'properties': {
+                'title': name,
+                'gridProperties': {
+                  'rowCount': 1000,
+                  'columnCount': targetCols,
+                  'frozenRowCount': 1,
+                },
+              },
+            },
+          });
+        } else if (metadata.sheetIdsByName.containsKey(name)) {
+          final sId = metadata.sheetIdsByName[name];
+          updateRequests.add({
+            'updateSheetProperties': {
+              'properties': {
+                'sheetId': sId,
+                'gridProperties': {
+                  'columnCount': targetCols,
+                },
+              },
+              'fields': 'gridProperties.columnCount',
+            },
+          });
+        }
+      }
+
+      if (updateRequests.isNotEmpty) {
+        final batchUrl = Uri.parse('$_sheetsBaseUrl/$spreadsheetId:batchUpdate');
+        final batchRes = await _httpClient.post(
+          batchUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'requests': updateRequests}),
+        );
+
+        if (batchRes.statusCode != 200) {
+          AppLogger.warning(
+            'Batch update sheets returned HTTP ${batchRes.statusCode}: ${batchRes.body}',
+          );
+        }
+      }
+
+      final valueUpdates = <Map<String, dynamic>>[];
+      for (final entry in sheetsWithHeaders.entries) {
+        final name = entry.key;
+        final headers = entry.value;
+        if (headers.isNotEmpty) {
+          valueUpdates.add({
+            'range': '$name!A1',
+            'values': [headers],
+          });
+        }
+      }
+
+      if (valueUpdates.isNotEmpty) {
+        final updateUrl = Uri.parse(
+          '$_sheetsBaseUrl/$spreadsheetId/values:batchUpdate',
+        );
+        await _httpClient.post(
+          updateUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'valueInputOption': 'USER_ENTERED',
+            'data': valueUpdates,
+          }),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('ensureSheetsWithHeaders encountered note: $e');
+    }
+  }
+
   /// Ensures that all 20 canonical worksheets exist in the spreadsheet and have their
   /// Row 1 headers and canonical lookups populated according to MasterSheetSchema.
   Future<void> populateCanonicalSheets({
@@ -573,6 +738,32 @@ class GoogleSheetsClient {
         'Cannot connect to Google Sheets. Offline mode active.',
       );
     }
+  }
+
+  /// Clears cell values within a specific range
+  Future<void> clearSheetRange({
+    required String accessToken,
+    required String spreadsheetId,
+    required String range,
+  }) async {
+    _validateParams(accessToken, spreadsheetId);
+    try {
+      final encodedRange = Uri.encodeComponent(range);
+      final url = Uri.parse(
+        '$_sheetsBaseUrl/$spreadsheetId/values/$encodedRange:clear',
+      );
+      await _httpClient.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+    } on SocketException {
+      throw const NetworkFailure(
+        'Cannot connect to Google Sheets. Offline mode active.',
+      );
+    } catch (_) {}
   }
 
   /// 6. Appends rows to a worksheet in a single batch API call

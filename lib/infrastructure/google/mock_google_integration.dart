@@ -711,6 +711,18 @@ class MockGoogleSheetsClient extends GoogleSheetsClient {
   }
 
   @override
+  Future<void> clearSheetRange({
+    required String accessToken,
+    required String spreadsheetId,
+    required String range,
+  }) async {
+    _checkSimulatedErrors('clearSheetRange');
+    final sheetName = range.contains('!') ? range.split('!').first : range;
+    final list = _getSheetRows(sheetName);
+    list.clear();
+  }
+
+  @override
   Future<int> batchAppendRows({
     required String accessToken,
     required String spreadsheetId,
@@ -771,5 +783,24 @@ class MockGoogleSheetsClient extends GoogleSheetsClient {
     }
 
     return {for (final s in sheetNames) s: _getSheetRows(s)};
+  }
+
+  @override
+  Future<String> createSpreadsheetWithSheets({
+    required String accessToken,
+    required String title,
+    required Map<String, List<String>> sheetsWithHeaders,
+  }) async {
+    _checkSimulatedErrors('createSpreadsheetWithSheets');
+    return 'sheet_mock_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  @override
+  Future<void> ensureSheetsWithHeaders({
+    required String accessToken,
+    required String spreadsheetId,
+    required Map<String, List<String>> sheetsWithHeaders,
+  }) async {
+    _checkSimulatedErrors('ensureSheetsWithHeaders');
   }
 }

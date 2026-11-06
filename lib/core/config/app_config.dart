@@ -19,6 +19,10 @@ class AppConfig {
   final String firebaseAppId;
   final String accountRegistrationUrl;
 
+  // Monthly Google Sheets Storage & Apps Script Integration (Feature PRD/TRD v1.1)
+  final bool enableMonthlyStorageRouting;
+  final String appsScriptWebAppUrl;
+
   const AppConfig({
     required this.environment,
     required this.appName,
@@ -43,6 +47,8 @@ class AppConfig {
     this.firebaseMessagingSenderId = '',
     this.firebaseAppId = '',
     this.accountRegistrationUrl = 'https://apnaclinic.in/register',
+    this.enableMonthlyStorageRouting = true,
+    this.appsScriptWebAppUrl = '',
   });
 
   static AppConfig current = const AppConfig(
@@ -86,6 +92,14 @@ class AppConfig {
     accountRegistrationUrl: String.fromEnvironment(
       'ACCOUNT_REGISTRATION_URL',
       defaultValue: 'https://apnaclinic.in/register',
+    ),
+    enableMonthlyStorageRouting: bool.fromEnvironment(
+      'ENABLE_MONTHLY_STORAGE',
+      defaultValue: true,
+    ),
+    appsScriptWebAppUrl: String.fromEnvironment(
+      'APPS_SCRIPT_WEB_APP_URL',
+      defaultValue: '',
     ),
   );
 
@@ -138,6 +152,8 @@ class AppConfig {
       firebaseMessagingSenderId: env['FIREBASE_MESSAGING_SENDER_ID'] ?? current.firebaseMessagingSenderId,
       firebaseAppId: env['FIREBASE_APP_ID'] ?? current.firebaseAppId,
       accountRegistrationUrl: env['ACCOUNT_REGISTRATION_URL'] ?? current.accountRegistrationUrl,
+      enableMonthlyStorageRouting: env['ENABLE_MONTHLY_STORAGE'] == 'true' || current.enableMonthlyStorageRouting,
+      appsScriptWebAppUrl: env['APPS_SCRIPT_WEB_APP_URL'] ?? current.appsScriptWebAppUrl,
     );
   }
 
@@ -162,6 +178,8 @@ class AppConfig {
     String? firebaseMessagingSenderId,
     String? firebaseAppId,
     String? accountRegistrationUrl,
+    bool? enableMonthlyStorageRouting,
+    String? appsScriptWebAppUrl,
   }) {
     return AppConfig(
       environment: environment ?? this.environment,
@@ -182,6 +200,9 @@ class AppConfig {
       firebaseAppId: firebaseAppId ?? this.firebaseAppId,
       accountRegistrationUrl:
           accountRegistrationUrl ?? this.accountRegistrationUrl,
+      enableMonthlyStorageRouting:
+          enableMonthlyStorageRouting ?? this.enableMonthlyStorageRouting,
+      appsScriptWebAppUrl: appsScriptWebAppUrl ?? this.appsScriptWebAppUrl,
     );
   }
 }
